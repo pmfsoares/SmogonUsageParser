@@ -2,15 +2,16 @@ import json, requests, os, re, collections, pickle, errno, jsonpickle, datetime,
 import urllib.request
 import numpy as np
 
-import traceback
-
 import movesetParser as mvparser
-
 from bs4 import BeautifulSoup
+try:
+    import readline
+except ImportError:
+    import pyreadline as readline
 
 pokedex = []
 movedex = []
-modes = []
+modes = ['gen1ou-0', 'gen1ou-1500', 'gen1ou-1630', 'gen1ou-1760', 'gen2ou-0', 'gen2ou-1500', 'gen2ou-1630', 'gen2ou-1760', 'gen2uu-0', 'gen2uu-1500', 'gen2uu-1630', 'gen2uu-1760', 'gen3nu-0', 'gen3nu-1500', 'gen3nu-1630', 'gen3nu-1760', 'gen3ou-0', 'gen3ou-1500', 'gen3ou-1630', 'gen3ou-1760', 'gen3uu-0', 'gen3uu-1500', 'gen3uu-1630', 'gen3uu-1760', 'gen4ou-0', 'gen4ou-1500', 'gen4ou-1630', 'gen4ou-1760', 'gen4ubers-0', 'gen4ubers-1500', 'gen4ubers-1630', 'gen4ubers-1760', 'gen5lc-0', 'gen5lc-1500', 'gen5lc-1630', 'gen5lc-1760', 'gen5ou-0', 'gen5ou-1500', 'gen5ou-1630', 'gen5ou-1760', 'gen6almostanyability-0', 'gen6almostanyability-1500', 'gen6almostanyability-1630', 'gen6almostanyability-1760', 'gen6ou-0', 'gen6ou-1500', 'gen6ou-1630', 'gen6ou-1760', 'gen6purehackmons-0', 'gen6purehackmons-1500', 'gen6purehackmons-1630', 'gen6purehackmons-1760', 'gen7anythinggoes-0', 'gen7anythinggoes-1500', 'gen7anythinggoes-1630', 'gen7anythinggoes-1760', 'gen7balancedhackmons-0', 'gen7balancedhackmons-1500', 'gen7balancedhackmons-1630', 'gen7balancedhackmons-1760', 'gen7doublesou-0', 'gen7doublesou-1500', 'gen7doublesou-1630', 'gen7doublesou-1760', 'gen7ou-0', 'gen7ou-1500', 'gen7ou-1630', 'gen7ou-1760', 'gen7ubers-0', 'gen7ubers-1500', 'gen7ubers-1630', 'gen7ubers-1760', 'gen81v1-0', 'gen81v1-1500', 'gen81v1-1630', 'gen81v1-1760', 'gen82v2doubles-0', 'gen82v2doubles-1500', 'gen82v2doubles-1630', 'gen82v2doubles-1760', 'gen8almostanyability-0', 'gen8almostanyability-1500', 'gen8almostanyability-1630', 'gen8almostanyability-1760', 'gen8anythinggoes-0', 'gen8anythinggoes-1500', 'gen8anythinggoes-1630', 'gen8anythinggoes-1760', 'gen8balancedhackmons-0', 'gen8balancedhackmons-1500', 'gen8balancedhackmons-1630', 'gen8balancedhackmons-1760', 'gen8battlestadiumsingles-0', 'gen8battlestadiumsingles-1500', 'gen8battlestadiumsingles-1630', 'gen8battlestadiumsingles-1760', 'gen8camomons-0', 'gen8camomons-1500', 'gen8camomons-1630', 'gen8camomons-1760', 'gen8cap-0', 'gen8cap-1500', 'gen8cap-1630', 'gen8cap-1760', 'gen8cap1v1-0', 'gen8cap1v1-1500', 'gen8cap1v1-1630', 'gen8cap1v1-1760', 'gen8doublesou-0', 'gen8doublesou-1500', 'gen8doublesou-1695', 'gen8doublesou-1825', 'gen8doublesubers-0', 'gen8doublesubers-1500', 'gen8doublesubers-1630', 'gen8doublesubers-1760', 'gen8doublesuu-0', 'gen8doublesuu-1500', 'gen8doublesuu-1630', 'gen8doublesuu-1760', 'gen8inheritance-0', 'gen8inheritance-1500', 'gen8inheritance-1630', 'gen8inheritance-1760', 'gen8lc-0', 'gen8lc-1500', 'gen8lc-1630', 'gen8lc-1760', 'gen8megasforall-0', 'gen8megasforall-1500', 'gen8megasforall-1630', 'gen8megasforall-1760', 'gen8metronomebattle-0', 'gen8metronomebattle-1500', 'gen8metronomebattle-1630', 'gen8metronomebattle-1760', 'gen8mixandmega-0', 'gen8mixandmega-1500', 'gen8mixandmega-1630', 'gen8mixandmega-1760', 'gen8monotype-0', 'gen8monotype-1500', 'gen8monotype-1630', 'gen8monotype-1760', 'gen8nationaldex-0', 'gen8nationaldex-1500', 'gen8nationaldex-1630', 'gen8nationaldex-1760', 'gen8nationaldexag-0', 'gen8nationaldexag-1500', 'gen8nationaldexag-1630', 'gen8nationaldexag-1760', 'gen8nationaldexmonotype-0', 'gen8nationaldexmonotype-1500', 'gen8nationaldexmonotype-1630', 'gen8nationaldexmonotype-1760', 'gen8nationaldexuu-0', 'gen8nationaldexuu-1500', 'gen8nationaldexuu-1630', 'gen8nationaldexuu-1760', 'gen8natureswap-0', 'gen8natureswap-1500', 'gen8natureswap-1630', 'gen8natureswap-1760', 'gen8nfe-0', 'gen8nfe-1500', 'gen8nfe-1630', 'gen8nfe-1760', 'gen8nu-0', 'gen8nu-1500', 'gen8nu-1630', 'gen8nu-1760', 'gen8ou-0', 'gen8ou-1500', 'gen8ou-1695', 'gen8ou-1825', 'gen8oublitz-0', 'gen8oublitz-1500', 'gen8oublitz-1630', 'gen8oublitz-1760', 'gen8pu-0', 'gen8pu-1500', 'gen8pu-1630', 'gen8pu-1760', 'gen8ru-0', 'gen8ru-1500', 'gen8ru-1630', 'gen8ru-1760', 'gen8sharedpower-0', 'gen8sharedpower-1500', 'gen8sharedpower-1630', 'gen8sharedpower-1760', 'gen8stabmons-0', 'gen8stabmons-1500', 'gen8stabmons-1630', 'gen8stabmons-1760', 'gen8tiershift-0', 'gen8tiershift-1500', 'gen8tiershift-1630', 'gen8tiershift-1760', 'gen8ubers-0', 'gen8ubers-1500', 'gen8ubers-1630', 'gen8ubers-1760', 'gen8uu-0', 'gen8uu-1500', 'gen8uu-1630', 'gen8uu-1760', 'gen8vgc2021-0', 'gen8vgc2021-1500', 'gen8vgc2021-1630', 'gen8vgc2021-1760', 'gen8zu-0', 'gen8zu-1500', 'gen8zu-1630', 'gen8zu-1760']
 speciesLookup = {}
 weaknesses_dict = {"Normal": np.array([1, 2, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]), "Fighting": np.array([1, 1, 2, 1, 1, 0.5, 0.5, 1, 1, 1, 1, 1, 1, 2, 1, 1, 0.5, 2]), "Flying": np.array([1, 0.5, 1, 1, 0, 2, 0.5, 1, 1, 1, 1, 0.5, 2, 1, 2, 1, 1, 1]), "Poison": np.array([1, 0.5, 1, 0.5, 2, 1, 0.5, 1, 1, 1, 1, 0.5, 1, 2, 1, 1, 1, 0.5]), "Ground": np.array([1, 1, 1, 0.5, 1, 0.5, 1, 1, 1, 1, 2, 2, 0, 1, 2, 1, 1, 1]), "Rock": np.array([0.5, 2, 0.5, 0.5, 2, 1, 1, 1, 2, 0.5, 2, 2, 1, 1, 1, 1, 1, 1]), "Bug": np.array([1, 0.5, 2, 1, 0.5, 2, 1, 1, 1, 2, 1, 0.5, 1, 1, 1, 1, 1, 1]), "Ghost": np.array([0, 0, 1, 0.5, 1, 1, 0.5, 2, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1]), "Steel": np.array([0.5, 2, 0.5, 0, 2, 0.5, 0.5, 1, 0.5, 2, 1, 0.5, 1, 0.5, 0.5, 0.5, 1, 0.5]), "Fire": np.array([1, 1, 1, 1, 2, 2, 0.5, 1, 0.5, 0.5, 2, 0.5, 1, 1, 0.5, 1, 1, 0.5]), "Water": np.array([1, 1, 1, 1, 1, 1, 1, 1, 0.5, 0.5, 0.5, 2, 2, 1, 0.5, 1, 1, 1]), "Grass": np.array([1, 1, 2, 2, 0.5, 1, 2, 1, 1, 2, 0.5, 0.5, 0.5, 1, 2, 1, 1, 1]), "Electric": np.array([1, 1, 0.5, 1, 2, 1, 1, 1, 0.5, 1, 1, 1, 0.5, 1, 1, 1, 1, 1]), "Psychic": np.array([1, 0.5, 1, 1, 1, 1, 2, 2, 1, 1, 1, 1, 1, 0.5, 1, 1, 2, 1]), "Ice": np.array([1, 2, 1, 1, 1, 2, 1, 1, 2, 2, 1, 1, 1, 1, 0.5, 1, 1, 1]), "Dragon": np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 0.5, 0.5, 0.5, 0.5, 1, 2, 2, 1, 2]), "Dark": np.array([1, 2, 1, 1, 1, 1, 2, 0.5, 1, 1, 1, 1, 1, 0, 1, 1, 0.5, 2]), "Fairy": np.array([1, 0.5, 1, 2, 1, 1, 0.5, 1, 2, 1, 1, 1, 1, 1, 1, 0, 0.5, 1])}
 
@@ -29,11 +30,31 @@ pokemans_dict = {}
 teammatesUsage = {}
 
 resistances_dict = {}
+
+#https://stackoverflow.com/questions/7821661/how-to-code-autocompletion-in-python
+class AutoCompleter(object):  # Custom completer
+
+    def __init__(self, options):
+        self.options = sorted(options)
+
+    def complete(self, text, state):
+        if state == 0:  # on first trigger, build possible matches
+            if text:  # cache matches (entries that start with entered text)
+                self.matches = [s for s in self.options 
+                                    if s and s.startswith(text)]
+            else:  # no text entered, all matches possible
+                self.matches = self.options[:]
+
+        # return match indexed by state
+        try: 
+            return self.matches[state]
+        except IndexError:
+            return None
+
 class usageStats:
     def __init__(self, data, mateUsage, dt):
         splitFilter = filter(None, re.split(r'(gen[0-9]+)', data["info"]["metagame"]))
         splitList = list(splitFilter)
-        print(str(spl))
         self.gen = splitList[0]
         self.metagame = splitList[1]
         self.date = dt
@@ -58,9 +79,9 @@ class pkm:
         self.usage      = float(data["usage"])*100
         self.rawcc      = data["Raw count"]
         self.moves      = getMoves(data["Moves"])
-        self.abilities  = getItemAbilities(data["Abilities"])
+        self.abilities  = getItemAbilities(data["Abilities"], False)
         self.teammatesPre  = getTeammates(data["Teammates"])
-        self.items      = getItemAbilities(data["Items"])
+        self.items      = getItemAbilities(data["Items"], True)
         self.spreads    = getSpreads(data["Spreads"])
         self.pokedex_entry    = dict(searchPokedex(pokemon))
         self.species    = self.pokedex_entry["name"]
@@ -72,19 +93,21 @@ class pkm:
         #p#rint(self.teammates)
     def printInfo(self):
         self.printUsage()
-        self.printItems()
-        #self.printAbilities()
-        self.printTeammates()
+        self.printAbilities()
         self.printSpreads()
+        self.printTeammates()
+        self.printItems()
 
     def printAbilities(self):
+        print("\nAbilities\n")
         for ab in self.abilities:
-            print("(" + str(ab[1] + "% )" + ab[0]))
+            print("(" + str(ab[1]) + "% )" + ab[0])
 
     def printUsage(self):
         print(self.species + ": " + str(self.usage) + "%")
 
     def printSpreads(self):
+        print("\nSpreads\n")
         spreadsSorted = sorted(self.spreads, key=lambda k: k[7][1], reverse=True) 
         for s in spreadsSorted:
             if s == None or s[7][1] < 1.0:
@@ -97,6 +120,7 @@ class pkm:
             + s[5][0] + ":" + s[5][1] + " / "
             + s[6][0] + ":" + s[6][1]) 
     def printItems(self):
+        print("\nItems\n")
         itemsSorted = sorted(self.items, key=lambda k: k[1], reverse=True)
         for i in itemsSorted: 
             print("(" + str(i[1]) + "%) " + i[0])
@@ -115,6 +139,7 @@ class pkm:
 
     
     def printTeammates(self):
+        print("\nTeammates\n")
         matesSorted = sorted(self.teammates, key=lambda k: k[1], reverse=True)
         for mate in matesSorted:
             print( "(" + str(mate[1]) + " %) " + mate[0])
@@ -123,7 +148,7 @@ class pkm:
 def save_obj(obj, folder, name):
     dir = os.path.dirname(os.path.abspath(__file__))
     filename = name + '.pkl'
-    objFolder = os.path.join(dir, 'obj/' + folder + "/")
+    objFolder = os.path.join(dir, 'obj', folder + "/")
     if not os.path.exists(os.path.dirname(objFolder)):
         try:
             os.makedirs(os.path.dirname(objFolder))
@@ -136,7 +161,8 @@ def save_obj(obj, folder, name):
 def load_obj(name):
     dir = os.path.dirname(os.path.abspath(__file__))
     filename = name + '.pkl'
-    objFolder = os.path.join(dir, 'obj/')
+    objFolder = os.path.join(dir, 'obj')
+    print(os.path.join(objFolder, filename))
     try:
         with open(os.path.join(objFolder, filename), 'rb') as f:
             return pickle.load(f)
@@ -158,11 +184,14 @@ def getMoves(moves):
             res_moves.append((tmp_move["name"], tmp_move["type"], percentage))
     return res_moves
 
-def getItemAbilities(data):
+def getItemAbilities(data, item):
     res = []
     weight_total = sum(data.values())
     for key in data:
         percentage = ((data[key] / weight_total) * 100 )
+        if item and percentage < 1.0:
+            continue
+        
         res.append((key, percentage))
     return res
 
@@ -276,14 +305,14 @@ def get_resistances(types_dict):
 def savePickles(mode, dt, usage_dict, moves_dict, abilities_dict, teammates_dict, items_dict, spreads_dict, stats):
     print("Saving " + str(mode) + "pickles @" + str(datetime.datetime.now()))
     sep = "_"
-    save_obj(usage_dict,        mode, "usage_dict"          + sep + mode + sep + dt)
-    save_obj(moves_dict,        mode, "moves_dict"          + sep + mode + sep + dt)
-    save_obj(teammates_dict,    mode, "teammates_dict"      + sep + mode + sep + dt)
-    save_obj(items_dict,        mode, "items_dict"          + sep + mode + sep + dt)
-    save_obj(abilities_dict,    mode, "abilities_dict"      + sep + mode + sep + dt)
-    save_obj(spreads_dict,      mode, "spreads_dict"        + sep + mode + sep + dt)
-    save_obj(types_dict,        mode, "types_dict"          + sep + mode + sep + dt)
-    save_obj(resistances_dict,  mode, "resistances_dict"    + sep + mode + sep + dt)
+    save_obj(usage_dict,        mode, "usage_dict"          + sep + mode + sep + str(dt))
+    save_obj(moves_dict,        mode, "moves_dict"          + sep + mode + sep + str(dt))
+    save_obj(teammates_dict,    mode, "teammates_dict"      + sep + mode + sep + str(dt))
+    save_obj(items_dict,        mode, "items_dict"          + sep + mode + sep + str(dt))
+    save_obj(abilities_dict,    mode, "abilities_dict"      + sep + mode + sep + str(dt))
+    save_obj(spreads_dict,      mode, "spreads_dict"        + sep + mode + sep + str(dt))
+    save_obj(types_dict,        mode, "types_dict"          + sep + mode + sep + str(dt))
+    save_obj(resistances_dict,  mode, "resistances_dict"    + sep + mode + sep + str(dt))
     save_obj(stats,     mode, "pokemans_dict"       + sep + mode + sep + dt)
 
 def getModes():
@@ -307,7 +336,6 @@ def getUrlDict(local):
     dir = os.path.dirname(os.path.abspath(__file__))
     pathsDict = os.path.join(dir, 'obj' , "localPaths.pkl")
     webDict = os.path.join(dir, 'obj', "webPaths.pkl")
-    print(pathsDict + "\n" + webDict)
     if local and os.path.exists(pathsDict):
         return load_obj("localPaths")
     elif not local and os.path.exists(webDict):
@@ -316,8 +344,6 @@ def getUrlDict(local):
         baseUrl =  'https://www.smogon.com/stats/'
         latest = getUrlPaths(baseUrl)
         latestDate = latest.replace(baseUrl, '').replace("/", '')
-        print(latestDate)
-    
         if not local:
             chaosUrl = latest + "chaos/"
             movesetUrl = latest + "moveset/"
@@ -325,7 +351,7 @@ def getUrlDict(local):
             chaosUrl = os.path.join(dir, "stats", "chaos")
             movesetUrl = os.path.join(dir, "stats", "moveset")
 
-        modes = getModes()
+        #modes = getModes()
         urlsDict = {}
         extChaos = '.json'
         extMoveset = '.txt'
@@ -340,7 +366,7 @@ def getUrlDict(local):
 
 types_dict = {} 
 
-def parser(local, urlsDict):
+def parserMain(local, urlsDict):
     print("Starting dataset gen @ [" + str(datetime.datetime.now()) + "]")
     global modes
     resistances_dict = get_resistances(types_dict)
@@ -348,15 +374,19 @@ def parser(local, urlsDict):
     for mode in urlsDict:
         print(mode) 
         #Armindo
+        parserMode(urlsDict[mode], mode, local)
+    print("Finished dataset gen @ [" + str(datetime.datetime.now()) + "]")
+
+def parserMode(mode, m, local):
         usage_dict = {}
         moves_dict = {}
         abilities_dict = {}
         teammates_dict = {}
         items_dict = {}
         spreads_dict = {}
-        teammatesUsage = mvparser.parseFormat(urlsDict[mode][1], local)
-        tmp = getUsageStats(urlsDict[mode][0], local)
-        stats = usageStats(tmp, teammatesUsage, urlsDict[mode][2])
+        teammatesUsage = mvparser.parseFormat(mode[1], local)
+        tmp = getUsageStats(mode[0], local)
+        stats = usageStats(tmp, teammatesUsage, mode[2])
         for pkm_key, poke in stats.pokemons.items():
             poke.fixTeammatesPer(stats.pokemons)
             usage_dict[poke.species] = poke.usage
@@ -366,28 +396,15 @@ def parser(local, urlsDict):
             spreads_dict[poke.species] = poke.spreads
             abilities_dict[poke.species] = poke.abilities
             types_dict[poke.species] = poke.types
-        
-        savePickles(mode, urlsDict[mode][2], usage_dict, moves_dict, abilities_dict, teammates_dict, items_dict, spreads_dict, stats)
-    print("Finished dataset gen @ [" + str(datetime.datetime.now()) + "]")
+        savePickles(m, mode[2], usage_dict, moves_dict, abilities_dict, teammates_dict, items_dict, spreads_dict, stats)
 
-def exportJSON(mode):
-    usage_dict      = load_obj("gen8vgc2021-1760/usage_dict_gen8vgc2021-1760_2021-02")
-    moves_dict      = load_obj("gen8vgc2021-1760/moves_dict_gen8vgc2021-1760_2021-02")
-    teammates_dict  = load_obj("gen8vgc2021-1760/teammates_dict_gen8vgc2021-1760_2021-02")
-    items_dict      = load_obj("gen8vgc2021-1760/items_dict_gen8vgc2021-1760_2021-02")
-    abilities_dict  = load_obj("gen8vgc2021-1760/abilities_dict_gen8vgc2021-1760_2021-02")
-    spreads_dict    = load_obj("gen8vgc2021-1760/spreads_dict_gen8vgc2021-1760_2021-02")
-    types_dict      = load_obj("gen8vgc2021-1760/types_dict_gen8vgc2021-1760_2021-02")
-    resistances_dict= load_obj("gen8vgc2021-1760/resistances_dict_gen8vgc2021-1760_2021-02")
-    pokemans_dict   = load_obj("gen8vgc2021-1760/pokemans_dict_gen8vgc2021-1760_2021-02")
-
-
+def exportJSON(mode, path):
+    pokemans_dict   = load_obj(path)
 
     searchTerms = ["Tapu Fini", "Incineroar", "Tornadus", "Regieleki", "done"]
     pokes = "["
     for search in searchTerms:
         if search in pokemans_dict:
-            #pokemans_dict[search].printInfo()
             if pokemans_dict[search].teammatesPre and pokemans_dict[search].teammatesUsage:
                 del pokemans_dict[search].teammatesPre
                 del pokemans_dict[search].teammatesUsage
@@ -395,11 +412,8 @@ def exportJSON(mode):
             if searchTerms.index(search) == 0:
                 pokes += json.dumps(pokemans_dict[search].__dict__)
             else:
-                print("else")
                 pokes += ',' + json.dumps(pokemans_dict[search].__dict__)
         elif search == "done":
-            #st = json.dumps(pokemans_dict[search].__dict__)
-            #st = json.dumps(pokes)
             pokes += "]"
             print(pokes[17])
             with open("pokes.json", 'w') as f:
@@ -418,10 +432,41 @@ if args[0] == "-l" or args[0] == "--local":
             elif not os.path.exists(p[1]):
                 print("File " + p[1] + "missing (did you wget the moveset directory before starting the script?)")
                 sys.exit("Run -h for help running the parser")
-    parser(True, urlsDict)
+    parserMain(True, urlsDict)
 elif args[0] == "-w" or args[0] == "--web":
     urlsDict = getUrlDict(False)
-    parser(False, urlsDict)
+    parserMain(False, urlsDict)
+elif args[0] == "-s" or args[0] == "--search":
+    completer = AutoCompleter(modes)
+    readline.set_completer_delims(' \t\n;')
+    readline.set_completer(completer.complete)
+    readline.parse_and_bind('tab: complete')
+    pesquisa = ""
+    while(pesquisa not in modes):
+        pesquisa = input("Input: ")
+        if pesquisa not in modes:
+            print("Unknown mode, please try again(you can autocomplete with tab).") 
+    url = getUrlDict(True)[pesquisa]
+    dir = os.path.dirname(os.path.abspath(__file__))
+    dir = os.path.join(dir, 'obj')
+    pathObj = os.path.join(pesquisa, "pokemans_dict_" + pesquisa + "_" + url[2] )
+    pathObjDict = os.path.join(dir, pathObj)
+    if os.path.exists(pathObjDict + ".pkl"):
+        pokemans = load_obj(pathObj)
+        indexes = list(pokemans.pokemons.keys())
+        completer = AutoCompleter(indexes)
+        readline.set_completer_delims(' \t\n;')
+        readline.set_completer(completer.complete)
+        readline.parse_and_bind('tab: complete')
+        pesquisa = ""
+        while(pesquisa not in pokemans.pokemons):
+            pesquisa = input("Input: ")
+            print(pesquisa)
+            if pesquisa not in pokemans.pokemons:
+                print("Unknown mode, please try again(you can autocomplete with tab).")
+        
+        pokemans.pokemons[pesquisa].printInfo()
+
 else:
     print("Unknown argument: [" + args[0] + "], use --local/-l or --web/-w")
     #print("wget -r -nc -np -nH --cut-dirs=2 -A txt -P ./stats https://www.smogon.com/stats/{year}-{month}/moveset/")
