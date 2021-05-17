@@ -81,9 +81,9 @@ def parseFormat(movesetFile, local):
     for poke in pkmsPre:
         tmp_mates = {}
         for mate in poke[1]:
-            tmp = list(filter(None, re.split(r'(([+]|[-])\d+([.,]\d+)?)', mate)))
-            tmp[1] = re.sub(r'[+]|[-]', '', tmp[1])
-            tmp_mates[tmp[0].strip()] = tmp[1:3]
-        
+            #old regex for the +% on teammates r'(([+]|[-])\d+([.,]\d+)?)'
+            tmp = list(filter(None, re.split(r'(\d+([.,]\d+)?)', mate)))
+            #tmp[1] = re.sub(r'[+]|[-]', '', tmp[0])
+            tmp_mates[tmp[0].strip()] = tmp[1]
         pkms[poke[0]] = tmp_mates
     return pkms
