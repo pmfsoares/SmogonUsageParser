@@ -14,7 +14,7 @@
 ## TODO
 
 * Finish the option to load the pickles of a chosen mode, and export the corresponding JSON.
-* Search a pokemon on a chosen mode, and print its stats.
+* ~Search a pokemon on a chosen mode, and print its stats.~
 
   
 
