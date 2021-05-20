@@ -90,7 +90,7 @@ class pkm:
         self.teammates = []
         self.teammatesUsage = mateUsage
         #self.happiness  = data["Happiness"]
-        #p#rint(self.teammates)
+        
     def printInfo(self):
         self.printUsage()
         self.printAbilities()
@@ -176,9 +176,10 @@ def getMoves(moves):
     res_moves = []
     weight_total = sum(moves.values())
     for move in moves:
+        
         tmp_move = searchMovedex(move)
         if(tmp_move == None):
-            res_moves.append(("Other", "n/a", move))
+            res_moves.append(("Other", "n/a", ((moves[move] / weight_total) * 100 ) * 4))
         else:
             #Transforma os weights em percentagem, weight dum move / weight sum * 100 = %, multiplica-se por 4 visto cada pkm ter 4 moves
             percentage = ((moves[move] / weight_total) * 100 ) * 4
@@ -374,6 +375,8 @@ def parserMain(local, urlsDict):
     resistances_dict = get_resistances(types_dict)
 
     for mode in urlsDict:
+        if(mode != "gen8vgc2021-1760"):
+            continue
         print(mode) 
         #Armindo
         parserMode(urlsDict[mode], mode, local)
