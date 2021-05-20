@@ -375,8 +375,6 @@ def parserMain(local, urlsDict):
     resistances_dict = get_resistances(types_dict)
 
     for mode in urlsDict:
-        if(mode != "gen8vgc2021-1760"):
-            continue
         print(mode) 
         #Armindo
         parserMode(urlsDict[mode], mode, local)
