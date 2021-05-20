@@ -11,6 +11,8 @@ except ImportError:
 
 pokedex = []
 movedex = []
+itemdex = []
+abilitydex = []
 modes = []
 speciesLookup = {}
 weaknesses_dict = {"Normal": np.array([1, 2, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]), "Fighting": np.array([1, 1, 2, 1, 1, 0.5, 0.5, 1, 1, 1, 1, 1, 1, 2, 1, 1, 0.5, 2]), "Flying": np.array([1, 0.5, 1, 1, 0, 2, 0.5, 1, 1, 1, 1, 0.5, 2, 1, 2, 1, 1, 1]), "Poison": np.array([1, 0.5, 1, 0.5, 2, 1, 0.5, 1, 1, 1, 1, 0.5, 1, 2, 1, 1, 1, 0.5]), "Ground": np.array([1, 1, 1, 0.5, 1, 0.5, 1, 1, 1, 1, 2, 2, 0, 1, 2, 1, 1, 1]), "Rock": np.array([0.5, 2, 0.5, 0.5, 2, 1, 1, 1, 2, 0.5, 2, 2, 1, 1, 1, 1, 1, 1]), "Bug": np.array([1, 0.5, 2, 1, 0.5, 2, 1, 1, 1, 2, 1, 0.5, 1, 1, 1, 1, 1, 1]), "Ghost": np.array([0, 0, 1, 0.5, 1, 1, 0.5, 2, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1]), "Steel": np.array([0.5, 2, 0.5, 0, 2, 0.5, 0.5, 1, 0.5, 2, 1, 0.5, 1, 0.5, 0.5, 0.5, 1, 0.5]), "Fire": np.array([1, 1, 1, 1, 2, 2, 0.5, 1, 0.5, 0.5, 2, 0.5, 1, 1, 0.5, 1, 1, 0.5]), "Water": np.array([1, 1, 1, 1, 1, 1, 1, 1, 0.5, 0.5, 0.5, 2, 2, 1, 0.5, 1, 1, 1]), "Grass": np.array([1, 1, 2, 2, 0.5, 1, 2, 1, 1, 2, 0.5, 0.5, 0.5, 1, 2, 1, 1, 1]), "Electric": np.array([1, 1, 0.5, 1, 2, 1, 1, 1, 0.5, 1, 1, 1, 0.5, 1, 1, 1, 1, 1]), "Psychic": np.array([1, 0.5, 1, 1, 1, 1, 2, 2, 1, 1, 1, 1, 1, 0.5, 1, 1, 2, 1]), "Ice": np.array([1, 2, 1, 1, 1, 2, 1, 1, 2, 2, 1, 1, 1, 1, 0.5, 1, 1, 1]), "Dragon": np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 0.5, 0.5, 0.5, 0.5, 1, 2, 2, 1, 2]), "Dark": np.array([1, 2, 1, 1, 1, 1, 2, 0.5, 1, 1, 1, 1, 1, 0, 1, 1, 0.5, 2]), "Fairy": np.array([1, 0.5, 1, 2, 1, 1, 0.5, 1, 2, 1, 1, 1, 1, 1, 1, 0, 0.5, 1])}
@@ -22,6 +24,10 @@ with open(os.path.join(dexFolder[0], "moves-min.json"), 'r') as file:
     movedex = json.load(file)
 with open(os.path.join(dexFolder[0], "pokedex.json"), 'r') as file:
     pokedex = json.load(file)
+with open(os.path.join(dexFolder[0], "items.json"), 'r') as file:
+    itemdex = json.load(file)
+with open(os.path.join(dexFolder[0], "abilities.json"), 'r') as file:
+    abilitydex = json.load(file)
 with open(os.path.join(dexFolder[0], "species-lookup.json"), 'r') as file:
     speciesLookup = json.load(file)
 
@@ -193,9 +199,36 @@ def getItemAbilities(data, item):
         percentage = ((data[key] / weight_total) * 100 )
         if item and percentage < 1.0:
             continue
-        
-        res.append((key, percentage))
+        if key == "nothing":
+            res.append(("Nothing", percentage))
+            continue
+        elif key == "noability":
+            res.append(("No ability", percentage))
+            continue
+        if item:
+            obj = searchItemdex(key)
+        elif not item:
+            obj = searchAbilityDex(key)
+        res.append((obj["name"], percentage))
     return res
+
+def searchItemdex(item):
+    if item in itemdex:
+        return itemdex[item]
+    else:
+        for key in itemdex:
+            if(itemdex[key]["name"] == item):
+                return itemdex[key]
+
+def searchAbilityDex(ab):
+    if ab in abilitydex:
+        return abilitydex[ab]
+    else:
+        for key in abilitydex:
+            if(abilitydex[key]["name"] == ab):
+                return abilitydex[key]
+
+
 
 def getTeammates(mates):
     res_teammates = []
