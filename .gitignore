@@ -1,9 +1,11 @@
 __pycache__/
-app/
-
+web/
+node_modules/
 obj/
 !obj/modes.pkl
-
+export/
 pokes.json
 stats/
 smogonParser.py.bk
+.package-lock.json
+.package.json
