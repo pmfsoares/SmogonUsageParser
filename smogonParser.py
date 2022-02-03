@@ -89,9 +89,10 @@ class pkm:
         self.teammatesPre  = getTeammates(data["Teammates"])
         self.items      = getItemAbilities(data["Items"], True)
         self.spreads    = getSpreads(data["Spreads"])
-        self.pokedex_entry    = dict(searchPokedex(pokemon))
-        self.species    = self.pokedex_entry["name"]
-        self.types      = self.pokedex_entry["types"]
+        tempEntry = dict(searchPokedex(pokemon))
+        self.num = tempEntry["num"]
+        self.species    = tempEntry["name"]
+        self.types      = tempEntry["types"]
         self.rawname    = pokemon
         self.teammates = []
         self.teammatesUsage = mateUsage
@@ -134,7 +135,7 @@ class pkm:
     def fixTeammatesPer(self, pokemans_dict):
         for mate in self.teammatesPre:
             if (mate[0] in self.teammatesUsage[self.rawname].keys() ) and (mate[0] in pokemans_dict or searchPokedex(mate[0])["key"] in pokemans_dict):
-                tmpMateUsage = float(pokemans_dict[mate[0]].usage)
+                #tmpMateUsage = float(pokemans_dict[mate[0]].usage)
                 tmpMate = self.teammatesUsage[self.rawname][mate[0]]
                 self.teammates.append((mate[0], float(tmpMate[0])))
                 #if tmpMate[1] == '+':
@@ -274,8 +275,8 @@ def searchPokedex(pkm):
                 pokedex[key]["key"] = key
                 return pokedex[key]
         if pkm.lower() in speciesLookup:
-            print(speciesLookup[pkm.lower()])
-            pokedex[pkm.lower()]["key"] = pkm.lower()
+            pokedex[pkm.lower()] = pokedex[speciesLookup[pkm.lower()]]
+            del pokedex[speciesLookup[pkm.lower()]]
             return pokedex[pkm.lower()]
         else:
             for p in speciesLookup:
@@ -410,6 +411,7 @@ def parserMain(local, urlsDict):
     for mode in urlsDict:
         print(mode) 
         #Armindo
+        #if(mode == "gen81v1-0"):
         parserMode(urlsDict[mode], mode, local)
     print("Finished dataset gen @ [" + str(datetime.datetime.now()) + "]")
 
@@ -433,27 +435,29 @@ def parserMode(mode, m, local):
             abilities_dict[poke.species] = poke.abilities
             types_dict[poke.species] = poke.types
         savePickles(m, mode[2], usage_dict, moves_dict, abilities_dict, teammates_dict, items_dict, spreads_dict, stats)
+        exportJSON(m, mode[2])
 
-def exportJSON(mode, path):
-    pokemans_dict   = load_obj(path)
 
-    searchTerms = ["Tapu Fini", "Incineroar", "Tornadus", "Regieleki", "done"]
-    pokes = "["
-    for search in searchTerms:
-        if search in pokemans_dict:
-            if pokemans_dict[search].teammatesPre and pokemans_dict[search].teammatesUsage:
-                del pokemans_dict[search].teammatesPre
-                del pokemans_dict[search].teammatesUsage
-            print("[ " + str(search) + " ]")
-            if searchTerms.index(search) == 0:
-                pokes += json.dumps(pokemans_dict[search].__dict__)
-            else:
-                pokes += ',' + json.dumps(pokemans_dict[search].__dict__)
-        elif search == "done":
-            pokes += "]"
-            print(pokes[17])
-            with open("pokes.json", 'w') as f:
-                f.write(pokes)
+def exportJSON(mode, dt):
+    print("Modo: " + mode)
+    pokemans_dict = load_obj(os.path.join(mode, "pokemans_dict_" + mode + "_" + dt )).pokemons
+    
+    #searchTerms = ["Tapu Fini", "Incineroar", "Tornadus", "Regieleki", "done"]
+    pokes = "{"
+    start = True;
+    for search in pokemans_dict:
+    #    if search in pokemans_dict:
+        #print("[ " + str(search) + " ]")
+        
+        if start:
+            pokes += json.dumps(search) + ':' + json.dumps(pokemans_dict[search].__dict__)
+            start = False
+        else:     
+            pokes += ',' + json.dumps(search) + ':' + json.dumps(pokemans_dict[search].__dict__)
+    #    elif search == "done":
+    pokes += "}"
+    with open(os.path.join("export", "pokes_" + mode + ".json"), 'w') as f:
+        f.write(pokes)
 
 #parser(True)
 
