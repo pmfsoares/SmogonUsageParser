@@ -24,8 +24,8 @@ def searchPokedex(pkm):
                 pokedex[key]["key"] = key
                 return pokedex[key]
         if pkm.lower() in speciesLookup:
-            print(speciesLookup[pkm.lower()])
-            pokedex[pkm.lower()]["key"] = pkm.lower()
+            pokedex[pkm.lower()] = pokedex[speciesLookup[pkm.lower()]]
+            del pokedex[speciesLookup[pkm.lower()]]
             return pokedex[pkm.lower()]
         else:
             for p in speciesLookup:
