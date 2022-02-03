@@ -7,5 +7,7 @@ export/
 pokes.json
 stats/
 smogonParser.py.bk
-.package-lock.json
-.package.json
+package-lock.json
+package.json
+
+dex/setup/pokedex.js
