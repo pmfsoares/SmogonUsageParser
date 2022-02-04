@@ -9,5 +9,6 @@ stats/
 smogonParser.py.bk
 package-lock.json
 package.json
-
 dex/setup/pokedex.js
+exampleJson.json
+dex/pokedexPretty.json
