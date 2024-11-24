@@ -9,7 +9,7 @@
 
   
 
-> Smogon's Pokemon Showdown usage statistics parser, main objective being ArmindoVGC consumption, so he doesn't continue to use Pikalytics stats.
+> Smogon's Pokemon Showdown usage statistics parser.
 
 ## TODO
 
